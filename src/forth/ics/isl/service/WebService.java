@@ -25,7 +25,7 @@ public class WebService {
         
         BlazegraphManager manager = new BlazegraphManager();
 
-        manager.openConnectionToBlazegraph("http://localhost:8091/blazegraph/namespace/kb/sparql");
+        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
 
      
         List<BindingSet> results = manager.selectAllQuery();
@@ -46,18 +46,18 @@ public class WebService {
         
         BlazegraphManager manager = new BlazegraphManager();
 
-        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/");
+        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
 
      
-      //  List<BindingSet> results = manager.query(msg);
+        List<BindingSet> results = manager.query(msg);
 
         
-       // String output = "Results size: " + results.size();
+        String output = "Results size: " + results.size();
         
 
         manager.closeConnectionToBlazeGraph();
         
-        return Response.status(200).entity("OK").build();
+        return Response.status(200).entity(output).build();
     }
 	
 }

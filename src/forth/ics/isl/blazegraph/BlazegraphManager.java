@@ -107,7 +107,7 @@ public class BlazegraphManager {
         } 
             
 
-        try( OutputStream out = new FileOutputStream("/home/mhalkiad/NetBeansProjects/WebServices-master/output.json")) {
+        try( OutputStream out = new FileOutputStream(System.getProperty("user.dir") + File.separator +"output.json")) {
                 tupleQuery.evaluate(new SPARQLResultsJSONWriter(out));
                 
             } catch(QueryEvaluationException e) {
