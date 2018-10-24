@@ -22,8 +22,12 @@ import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
+import org.eclipse.rdf4j.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
 
 
 
@@ -46,7 +50,8 @@ public class BlazegraphManager {
     }
     
     public void closeConnectionToBlazeGraph() {
-
+        
+        repo.getConnection().close();
      // this.repo.getBigdataSailRemoteRepository().getConnection().close();
 
     }
@@ -69,24 +74,47 @@ public class BlazegraphManager {
                 }
             }
         } 
-            
+        exportToFile(tupleQuery, RDFFormat.RDFJSON);
 
-        try( OutputStream out = new FileOutputStream(System.getProperty("user.dir") + File.separator +"output.json")) {
-                tupleQuery.evaluate(new SPARQLResultsJSONWriter(out));
-                
-            } catch(QueryEvaluationException e) {
-                System.out.println("QueryEvaluationException!");
-							
-        }
-        catch (FileNotFoundException fnfe) {
-            System.out.println("FileNotFoundException!!");
-            
-        } catch (IOException ex) {
-            Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
             
         return retList;
           
+    }
+    
+    public void exportToFile(TupleQuery tupleQuery, RDFFormat dataFormat)
+    {
+        if(dataFormat.equals(RDFFormat.RDFJSON)) {
+            try( OutputStream out = new FileOutputStream(System.getProperty("user.dir") + File.separator +"output.json")) {
+                    tupleQuery.evaluate(new SPARQLResultsJSONWriter(out));
+
+                } catch(QueryEvaluationException e) {
+                    System.out.println("QueryEvaluationException!");
+
+            }
+            catch (FileNotFoundException fnfe) {
+                System.out.println("FileNotFoundException!!");
+
+            } catch (IOException ex) {
+                Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(dataFormat.equals(RDFFormat.RDFXML)) {
+             try( OutputStream out = new FileOutputStream(System.getProperty("user.dir") + File.separator +"output.xml")) {
+                    tupleQuery.evaluate(new SPARQLResultsXMLWriter(out));
+
+                } catch(QueryEvaluationException e) {
+                    System.out.println("QueryEvaluationException!");
+
+            }
+            catch (FileNotFoundException fnfe) {
+                System.out.println("FileNotFoundException!!");
+
+            } catch (IOException ex) {
+                Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+       
     }
     
     
@@ -106,24 +134,35 @@ public class BlazegraphManager {
             }
         } 
             
-
-        try( OutputStream out = new FileOutputStream(System.getProperty("user.dir") + File.separator +"output.json")) {
-                tupleQuery.evaluate(new SPARQLResultsJSONWriter(out));
-                
-            } catch(QueryEvaluationException e) {
-                System.out.println("QueryEvaluationException!");
-							
-        }
-        catch (FileNotFoundException fnfe) {
-            System.out.println("FileNotFoundException!!");
-            
-        } catch (IOException ex) {
-            Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        exportToFile(tupleQuery, RDFFormat.RDFJSON);
             
         return retList;
     }
     
     
-  
+    public void importFile(String filename, RDFFormat dataFormat) {
+        
+        
+        File f = new File(filename);
+
+        try (RepositoryConnection con = repo.getConnection()) {
+
+        con.begin();
+        try {
+
+            con.add(f, "", dataFormat);
+            con.commit();
+        }
+        catch (RepositoryException e) {
+      
+            con.rollback();
+            }catch (IOException ex) {
+                Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RDFParseException ex) {
+                Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    
 }

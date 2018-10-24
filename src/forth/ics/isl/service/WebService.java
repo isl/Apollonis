@@ -6,9 +6,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import forth.ics.isl.blazegraph.*;
+import java.io.File;
 
 import java.util.List;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 
 /**
@@ -58,6 +60,57 @@ public class WebService {
         manager.closeConnectionToBlazeGraph();
         
         return Response.status(200).entity(output).build();
+    }
+    
+    @GET
+    @Path("/importRDF")
+    public Response importRDF(@PathParam("name") String msg) {
+        
+        BlazegraphManager manager = new BlazegraphManager();
+
+        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
+
+     
+        manager.importFile(System.getProperty("user.dir") + File.separator +"input.rdf", RDFFormat.RDFXML);
+
+
+        manager.closeConnectionToBlazeGraph();
+        
+        return Response.status(200).entity("File imported successfully").build();
+    }
+    
+    @GET
+    @Path("/importJSON")
+    public Response importJSON(@PathParam("name") String msg) {
+        
+        BlazegraphManager manager = new BlazegraphManager();
+
+        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
+
+     
+        manager.importFile(System.getProperty("user.dir") + File.separator +"input.json", RDFFormat.RDFJSON);
+
+
+        manager.closeConnectionToBlazeGraph();
+        
+        return Response.status(200).entity("File imported successfully").build();
+    }
+    
+    @GET
+    @Path("/importTURTLE")
+    public Response importTURTLE(@PathParam("name") String msg) {
+        
+        BlazegraphManager manager = new BlazegraphManager();
+
+        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
+
+     
+        manager.importFile(System.getProperty("user.dir") + File.separator +"input.ttl", RDFFormat.TURTLE);
+
+
+        manager.closeConnectionToBlazeGraph();
+        
+        return Response.status(200).entity("File imported successfully").build();
     }
 	
 }
