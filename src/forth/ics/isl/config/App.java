@@ -1,5 +1,6 @@
 package forth.ics.isl.config;
 
+
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**

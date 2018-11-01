@@ -5,7 +5,6 @@
  */
 package forth.ics.isl.blazegraph;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -15,12 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.eclipse.rdf4j.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.eclipse.rdf4j.repository.Repository;
@@ -28,7 +29,6 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
-
 
 
 /**
@@ -41,7 +41,6 @@ public class BlazegraphManager {
     private Repository repo;
 
     
-    
     public void openConnectionToBlazegraph(String sparqlEndPoint) {
         
         repo = new SPARQLRepository(sparqlEndPoint);
@@ -49,10 +48,10 @@ public class BlazegraphManager {
         
     }
     
+    
     public void closeConnectionToBlazeGraph() {
         
         repo.getConnection().close();
-     // this.repo.getBigdataSailRemoteRepository().getConnection().close();
 
     }
     
@@ -75,9 +74,7 @@ public class BlazegraphManager {
             }
         } 
         exportToFile(tupleQuery, RDFFormat.RDFJSON);
-
-        
-            
+   
         return retList;
           
     }
@@ -120,11 +117,12 @@ public class BlazegraphManager {
     
     public List<BindingSet> query(String queryString) {
         
-        List<BindingSet> retList= new ArrayList<>();
+         List<BindingSet> retList= new ArrayList<>();
         TupleQuery tupleQuery;
         
         try (RepositoryConnection conn = repo.getConnection()) {
             
+         //   String queryString = "Select * where {?s ?p ?o}";
             tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
             
             try(TupleQueryResult tupleQueryResult = tupleQuery.evaluate()) {
@@ -133,24 +131,26 @@ public class BlazegraphManager {
                 }
             }
         } 
-            
         exportToFile(tupleQuery, RDFFormat.RDFJSON);
+
+        
             
         return retList;
     }
     
     
-    public void importFile(String filename, RDFFormat dataFormat) {
+    public void importFile(String filename) {
         
         
-        File f = new File(filename);
+        File file = new File(filename);
+        RDFFormat dataFormat = getRDFFormat(filename); 
 
         try (RepositoryConnection con = repo.getConnection()) {
 
         con.begin();
         try {
 
-            con.add(f, "", dataFormat);
+            con.add(file, "", dataFormat);
             con.commit();
         }
         catch (RepositoryException e) {
@@ -163,6 +163,32 @@ public class BlazegraphManager {
             }
         }
     }
+    
+    
+    private RDFFormat getRDFFormat(String filename)
+    {
+       String extension = FilenameUtils.getExtension(filename);
+       if(extension.equals("rdf"))
+           return RDFFormat.RDFXML;
+       else if(extension.equals("nt"))
+           return RDFFormat.NTRIPLES;
+       else if(extension.equals("ttl"))
+           return RDFFormat.TURTLE;
+       else if(extension.endsWith("n3"))
+           return RDFFormat.N3;
+       else
+           return null;
+    }
+    
+    
+    
+    public void updateQuery(String queryString)
+    {
+        Update update = repo.getConnection().prepareUpdate(QueryLanguage.SPARQL, queryString);
+        update.execute();
+    }
+    
+    
     
     
 }

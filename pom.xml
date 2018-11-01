@@ -59,12 +59,30 @@
 			<version>2.27</version>
 		</dependency>
                 <dependency>
+                        <groupId>org.glassfish.jersey.ext</groupId>
+                        <artifactId>jersey-mvc-jsp</artifactId>
+                        <version>2.27</version>
+                </dependency>
+<!--                <dependency>
+                        <groupId>org.glassfish.jersey.media</groupId>
+                        <artifactId>jersey-media-multipart</artifactId>
+                        <version>2.27</version>
+                </dependency>-->
+                <dependency>
                         <groupId>org.eclipse.rdf4j</groupId>
                         <artifactId>rdf4j-runtime</artifactId>
                         <version>2.4.0</version>
                 </dependency>
-
-
-	</dependencies>
+                <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>2.6</version>
+           </dependency>
+           <dependency>
+                        <groupId>org.glassfish.metro</groupId>
+                        <artifactId>webservices-rt</artifactId>
+                        <version>2.3</version>
+           </dependency>
+         </dependencies>
     <name>WebServices</name>
 </project>
