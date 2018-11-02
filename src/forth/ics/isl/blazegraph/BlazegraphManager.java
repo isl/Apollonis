@@ -9,12 +9,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -57,7 +61,6 @@ public class BlazegraphManager {
     
     
     public List<BindingSet> selectAllQuery() {
-        
         
         List<BindingSet> retList= new ArrayList<>();
         TupleQuery tupleQuery;
@@ -133,24 +136,20 @@ public class BlazegraphManager {
         } 
         exportToFile(tupleQuery, RDFFormat.RDFJSON);
 
-        
-            
         return retList;
     }
     
     
-    public void importFile(String filename) {
-        
-        
-        File file = new File(filename);
-        RDFFormat dataFormat = getRDFFormat(filename); 
-
+    public void importFile(InputStream file, RDFFormat format, String graph) {
+      
         try (RepositoryConnection con = repo.getConnection()) {
 
         con.begin();
         try {
-
-            con.add(file, "", dataFormat);
+            ValueFactory factory = SimpleValueFactory.getInstance();
+            IRI graphIRI = factory.createIRI(graph);
+            
+            con.add(file, graph, format, graphIRI);
             con.commit();
         }
         catch (RepositoryException e) {
@@ -163,7 +162,7 @@ public class BlazegraphManager {
             }
         }
     }
-    
+   
     
     private RDFFormat getRDFFormat(String filename)
     {
@@ -187,8 +186,4 @@ public class BlazegraphManager {
         Update update = repo.getConnection().prepareUpdate(QueryLanguage.SPARQL, queryString);
         update.execute();
     }
-    
-    
-    
-    
 }
