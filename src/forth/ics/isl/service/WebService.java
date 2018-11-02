@@ -2,7 +2,6 @@ package forth.ics.isl.service;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.QueryParam;
 
@@ -25,41 +24,21 @@ import org.eclipse.rdf4j.rio.Rio;
 
 @Path("/webServices")
 public class WebService {
-
-    @GET
-    @Path("/selectAll")
-        //TODO delete
-    public Response selectAll(@PathParam("name") String msg) {
-        
-        BlazegraphManager manager = new BlazegraphManager();
-
-        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
-
-     
-        List<BindingSet> results = manager.selectAllQuery();
-
-        
-        String output = "Results size: " + results.size();
-        
-
-        manager.closeConnectionToBlazeGraph();
-        
-        return Response.status(200).entity(output).build();
-    }
     
     
     @GET
     @Path("/query")
-    public Response query(@QueryParam("queryString") String queryString) {
+    public Response query(@QueryParam("queryString") String queryString,
+                          @HeaderParam("Accept") String accept,
+                          @QueryParam("namespace") String namespace,
+                          @QueryParam("timeout") Long timeout) {
         
         BlazegraphManager manager = new BlazegraphManager();
-
-        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
-
-     
-        List<BindingSet> results = manager.query(queryString);
-
+      
+        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/" + namespace + "/sparql");
         
+        List<BindingSet> results = manager.query(queryString, accept);
+
         String output = "Results size: " + results.size();
         
         manager.closeConnectionToBlazeGraph();
