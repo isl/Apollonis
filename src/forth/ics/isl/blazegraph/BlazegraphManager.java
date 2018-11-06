@@ -144,6 +144,7 @@ public class BlazegraphManager {
                 }
             }
         } 
+        System.out.println("============" + dataFormat);
         exportToFile(tupleQuery, dataFormat);
 
         return retList;

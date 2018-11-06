@@ -6,10 +6,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.QueryParam;
 
 import forth.ics.isl.blazegraph.*;
+import forth.ics.isl.utils.PropertiesManager;
 import java.io.InputStream;
 
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -25,17 +27,24 @@ import org.eclipse.rdf4j.rio.Rio;
 @Path("/webServices")
 public class WebService {
     
+    private PropertiesManager propertiesManager = PropertiesManager.getPropertiesManager();
     
     @GET
     @Path("/query")
+    //TODO produces
     public Response query(@QueryParam("queryString") String queryString,
-                          @HeaderParam("Accept") String accept,
+                          @DefaultValue("application/json") @HeaderParam("Accept") String accept,
                           @QueryParam("namespace") String namespace,
-                          @QueryParam("timeout") Long timeout) {
+                          @DefaultValue("0") @QueryParam("timeout") int timeout) {
         
         BlazegraphManager manager = new BlazegraphManager();
+        
+        String serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace.isEmpty())
+            namespace = propertiesManager.getTripleStoreNamespace();
       
-        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/" + namespace + "/sparql");
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
         List<BindingSet> results = manager.query(queryString, accept);
 
@@ -49,18 +58,23 @@ public class WebService {
     
     @POST
     @Path("/import")
-    @Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "ext/rdf+n3", "application/json"})
+    @Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
     public Response importToBlazegraph(InputStream file, 
-                                       @HeaderParam("Content-Type") String contentType,
+                                       @DefaultValue("application/x-turtle") @HeaderParam("Content-Type") String contentType,
                                        @QueryParam("namespace") String namespace,
                                        @QueryParam("graph") String graph) {
         
         BlazegraphManager manager = new BlazegraphManager();
 
-        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/" + namespace + "/sparql");
+        String serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace.isEmpty())
+            namespace = propertiesManager.getTripleStoreNamespace();
+      
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
         RDFFormat format = Rio.getParserFormatForMIMEType(contentType).get();
-
+         
         //manager.importFile(System.getProperty("user.dir") + File.separator +"input.json", RDFFormat.RDFJSON);
         manager.importFile(file, format, graph);
 
