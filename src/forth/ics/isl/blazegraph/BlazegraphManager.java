@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -37,6 +39,8 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
 
 
 /**
@@ -64,7 +68,7 @@ public class BlazegraphManager {
     }
     
     
-    public void exportToFile(TupleQuery tupleQuery, String dataFormat)
+    public void exportQueryFile(TupleQuery tupleQuery, String dataFormat)
     {
         if(TupleQueryResultFormat.CSV.getMIMETypes().contains(dataFormat))
         {
@@ -144,8 +148,8 @@ public class BlazegraphManager {
                 }
             }
         } 
-        System.out.println("============" + dataFormat);
-        exportToFile(tupleQuery, dataFormat);
+        //TODO changes
+        exportQueryFile(tupleQuery, dataFormat);
 
         return retList;
     }
@@ -179,5 +183,33 @@ public class BlazegraphManager {
     {
         Update update = repo.getConnection().prepareUpdate(QueryLanguage.SPARQL, queryString);
         update.execute();
+    }
+    
+    
+    public void exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
+        
+        try (RepositoryConnection con = repo.getConnection()) {
+            
+            con.begin();
+            
+            String fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
+            
+            RDFWriter writer = Rio.createWriter(dataFormat, new OutputStreamWriter(new FileOutputStream(new File(fullFilename))));
+         
+            if(!graph.isEmpty()) {
+                
+                ValueFactory factory = SimpleValueFactory.getInstance();
+                IRI graphIRI = factory.createIRI(graph);
+           
+                con.export(writer, graphIRI);
+            }
+            else
+                con.export(writer);
+           
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

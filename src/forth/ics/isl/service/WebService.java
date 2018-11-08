@@ -31,7 +31,7 @@ public class WebService {
     
     @GET
     @Path("/query")
-    //TODO produces
+    //TODO@Produces
     public Response query(@QueryParam("queryString") String queryString,
                           @DefaultValue("application/json") @HeaderParam("Accept") String accept,
                           @QueryParam("namespace") String namespace,
@@ -48,6 +48,7 @@ public class WebService {
         
         List<BindingSet> results = manager.query(queryString, accept);
 
+        //TODO not export to file
         String output = "Results size: " + results.size();
         
         manager.closeConnectionToBlazeGraph();
@@ -60,10 +61,10 @@ public class WebService {
     @Path("/import")
     @Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
     public Response importToBlazegraph(InputStream file, 
-                                       @DefaultValue("application/x-turtle") @HeaderParam("Content-Type") String contentType,
+                                       @DefaultValue("text/plain") @HeaderParam("Content-Type") String contentType,
                                        @QueryParam("namespace") String namespace,
-                                       @QueryParam("graph") String graph) {
-        
+                                       @DefaultValue("") @QueryParam("graph") String graph) {
+
         BlazegraphManager manager = new BlazegraphManager();
 
         String serviceURL = propertiesManager.getTripleStoreUrl();
@@ -86,6 +87,7 @@ public class WebService {
     
     @GET
     @Path("/update")
+    //TODO changes and testing
     public Response update(@QueryParam("update") String updateMsg) {
         
         BlazegraphManager manager = new BlazegraphManager();
@@ -97,6 +99,31 @@ public class WebService {
         manager.closeConnectionToBlazeGraph();
         
         return Response.status(200).entity("Updated!!").build();
+    }
+    
+    @GET
+    @Path("/export")
+    public Response export(@QueryParam("filename") String filename, 
+                                       @DefaultValue("text/plain") @QueryParam("format") String format,
+                                       @QueryParam("namespace") String namespace,
+                                       @DefaultValue("") @QueryParam("graph") String graph) 
+    {
+        BlazegraphManager manager = new BlazegraphManager();
+
+        String serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace.isEmpty())
+            namespace = propertiesManager.getTripleStoreNamespace();
+      
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
+        
+        RDFFormat rdfFormat = Rio.getParserFormatForMIMEType(format).get();
+         
+        manager.exportFile(filename, namespace, graph, rdfFormat);
+
+        manager.closeConnectionToBlazeGraph();
+
+        return Response.status(200).entity("Exported successfully!").build();
     }
    	
 }
