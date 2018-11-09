@@ -207,13 +207,13 @@ public class BlazegraphManager {
     }
     
     
-    public void exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
+    public String exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
         
+        String fullFilename = fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
+         
         try (RepositoryConnection con = repo.getConnection()) {
             
             con.begin();
-            
-            String fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
             
             RDFWriter writer = Rio.createWriter(dataFormat, new OutputStreamWriter(new FileOutputStream(new File(fullFilename))));
          
@@ -231,6 +231,6 @@ public class BlazegraphManager {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        return fullFilename;
     }
 }
