@@ -5,6 +5,7 @@
  */
 package forth.ics.isl.blazegraph;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -68,7 +69,7 @@ public class BlazegraphManager {
     }
     
     
-    public void exportQueryFile(TupleQuery tupleQuery, String dataFormat)
+    private void exportQueryFile(TupleQuery tupleQuery, String dataFormat)
     {
         if(TupleQueryResultFormat.CSV.getMIMETypes().contains(dataFormat))
         {
@@ -132,26 +133,50 @@ public class BlazegraphManager {
         }
     }
     
+    private ByteArrayOutputStream outputStreamData(TupleQuery tupleQuery, String dataFormat)
+    {
+        ByteArrayOutputStream out = null;
+ 
+            if(TupleQueryResultFormat.CSV.getMIMETypes().contains(dataFormat))
+            {
+                out = new ByteArrayOutputStream();
+                tupleQuery.evaluate(new SPARQLResultsCSVWriter(out));
+            }
+            else if(TupleQueryResultFormat.JSON.getMIMETypes().contains(dataFormat))
+            {
+                out = new ByteArrayOutputStream();
+                tupleQuery.evaluate(new SPARQLResultsJSONWriter(out));
+            }
+            else if(TupleQueryResultFormat.SPARQL.getMIMETypes().contains(dataFormat))
+            {
+                out = new ByteArrayOutputStream();
+                tupleQuery.evaluate(new SPARQLResultsXMLWriter(out));
+            }
+            else if(TupleQueryResultFormat.TSV.getMIMETypes().contains(dataFormat))
+            {
+                out = new ByteArrayOutputStream();
+                tupleQuery.evaluate(new SPARQLResultsTSVWriter(out));
+            }
+        return out;
+    }
     
-    public List<BindingSet> query(String queryString, String dataFormat) {
+    
+    public String query(String queryString, String dataFormat, int timeout) {
         
-         List<BindingSet> retList= new ArrayList<>();
         TupleQuery tupleQuery;
+        String response;
         
         try (RepositoryConnection conn = repo.getConnection()) {
    
             tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+            tupleQuery.setMaxExecutionTime(timeout);
             
-            try(TupleQueryResult tupleQueryResult = tupleQuery.evaluate()) {
-                while(tupleQueryResult.hasNext()) {
-                    retList.add(tupleQueryResult.next());
-                }
-            }
+            ByteArrayOutputStream out = outputStreamData(tupleQuery, dataFormat);
+            byte[] resp = out.toByteArray();
+            response = new String(resp);
         } 
-        //TODO changes
-        exportQueryFile(tupleQuery, dataFormat);
 
-        return retList;
+        return response;
     }
     
     

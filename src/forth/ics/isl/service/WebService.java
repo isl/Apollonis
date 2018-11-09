@@ -14,6 +14,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -31,9 +33,10 @@ public class WebService {
     
     @GET
     @Path("/query")
-    //TODO@Produces
+    @Produces({"text/csv", "application/json", "application/sparql-results+json", "application/sparql-results+xml", "application/xml", "text/tab-separated-values"})
+    //TODO changes to HeaderParam
     public Response query(@QueryParam("queryString") String queryString,
-                          @DefaultValue("application/json") @HeaderParam("Accept") String accept,
+                          @DefaultValue("application/json") @QueryParam("content-type") String contentType,
                           @QueryParam("namespace") String namespace,
                           @DefaultValue("0") @QueryParam("timeout") int timeout) {
         
@@ -41,15 +44,12 @@ public class WebService {
         
         String serviceURL = propertiesManager.getTripleStoreUrl();
         
-        if(namespace.isEmpty())
+        if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
       
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
-        List<BindingSet> results = manager.query(queryString, accept);
-
-        //TODO not export to file
-        String output = "Results size: " + results.size();
+        String output = manager.query(queryString, contentType, timeout);
         
         manager.closeConnectionToBlazeGraph();
         
@@ -60,8 +60,9 @@ public class WebService {
     @POST
     @Path("/import")
     @Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
+    //TODO changes to HeaderParam
     public Response importToBlazegraph(InputStream file, 
-                                       @DefaultValue("text/plain") @HeaderParam("Content-Type") String contentType,
+                                       @DefaultValue("text/plain") @QueryParam("Content-Type") String contentType,
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) {
 
@@ -103,6 +104,11 @@ public class WebService {
     
     @GET
     @Path("/export")
+    @Produces({"text/n3", "application/n-quads", "text/nquads", 
+               "application/n-triples", "text/plain",
+               "application/trig", "application/x-trig", "application/trix",
+               "text/turtle", "application/x-turtle" })
+    //TODO changes to HeaderParam
     public Response export(@QueryParam("filename") String filename, 
                                        @DefaultValue("text/plain") @QueryParam("format") String format,
                                        @QueryParam("namespace") String namespace,
@@ -123,6 +129,7 @@ public class WebService {
 
         manager.closeConnectionToBlazeGraph();
 
+        //TODO changes
         return Response.status(200).entity("Exported successfully!").build();
     }
    	
