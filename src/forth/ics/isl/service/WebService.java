@@ -9,14 +9,12 @@ import forth.ics.isl.blazegraph.*;
 import forth.ics.isl.utils.PropertiesManager;
 import java.io.InputStream;
 
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 
-import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
@@ -70,7 +68,7 @@ public class WebService {
 
         String serviceURL = propertiesManager.getTripleStoreUrl();
         
-        if(namespace.isEmpty())
+        if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
       
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
@@ -86,14 +84,20 @@ public class WebService {
     }
     
     
-    @GET
+    @POST
     @Path("/update")
-    //TODO changes and testing
-    public Response update(@QueryParam("update") String updateMsg) {
+    //TODO testing
+    public Response update(@QueryParam("update") String updateMsg,
+                           @QueryParam("namespace") String namespace) {
         
         BlazegraphManager manager = new BlazegraphManager();
 
-        manager.openConnectionToBlazegraph("http://139.91.183.72:8091/blazegraph/namespace/kb/sparql");
+        String serviceURL = propertiesManager.getTripleStoreUrl();
+        
+        if(namespace == null)
+            namespace = propertiesManager.getTripleStoreNamespace();
+      
+        manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
      
         manager.updateQuery(updateMsg);
 
@@ -118,7 +122,7 @@ public class WebService {
 
         String serviceURL = propertiesManager.getTripleStoreUrl();
         
-        if(namespace.isEmpty())
+        if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
       
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
