@@ -5,14 +5,17 @@
  */
 package forth.ics.isl.blazegraph;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -166,7 +169,7 @@ public class BlazegraphManager {
    
             tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
             tupleQuery.setMaxExecutionTime(timeout);
-            
+            //System.out.println("forth.ics.isl.blazegraph.BlazegraphManager.query():"+ tupleQuery);
             ByteArrayOutputStream out = outputStreamData(tupleQuery, dataFormat);
             byte[] resp = out.toByteArray();
             response = new String(resp);
@@ -186,15 +189,16 @@ public class BlazegraphManager {
             IRI graphIRI = factory.createIRI(graph);
             
             con.add(file, graph, format, graphIRI);
+            //con.add(new BufferedReader(new InputStreamReader(file, StandardCharsets.UTF_8)), graph, format, graphIRI);
             con.commit();
         }
         catch (RepositoryException e) {
       
             con.rollback();
             }catch (IOException ex) {
-                Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+               // Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RDFParseException ex) {
-                Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+               // Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -209,7 +213,7 @@ public class BlazegraphManager {
     
     public String exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
         
-        String fullFilename = fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
+        String fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
          
         try (RepositoryConnection con = repo.getConnection()) {
             

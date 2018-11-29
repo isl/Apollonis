@@ -36,7 +36,7 @@ public class WebService {
     @Produces({"text/csv", "application/json", "application/sparql-results+json", "application/sparql-results+xml", "application/xml", "text/tab-separated-values"})
     //TODO changes to HeaderParam
     public Response query(@QueryParam("queryString") String queryString,
-                          @DefaultValue("application/json") @QueryParam("content-type") String contentType,
+                          @DefaultValue("application/json") @QueryParam("contentType") String contentType,
                           @QueryParam("namespace") String namespace,
                           @DefaultValue("0") @QueryParam("timeout") int timeout) {
         
@@ -59,10 +59,11 @@ public class WebService {
     
     @POST
     @Path("/import")
-    @Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
+    //@Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
     //TODO changes to HeaderParam
+   // @DefaultValue("text/plain") @QueryParam("contentType") String contentType,
     public Response importToBlazegraph(InputStream file, 
-                                       @DefaultValue("text/plain") @QueryParam("Content-Type") String contentType,
+                                       @HeaderParam("Content-Type") String contentType,
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) {
 
@@ -72,12 +73,16 @@ public class WebService {
         
         if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
-      
+              
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
+        //contentType = "application/rdf+xml;charset=UTF-8";
+       // contentType = "application/rdf+xml";
+        //contentType = "application/x-turtle";
+        System.out.println("+++++++++++++++++++++++++++ContentType:" + contentType);
+        
         RDFFormat format = Rio.getParserFormatForMIMEType(contentType).get();
-         
-        //manager.importFile(System.getProperty("user.dir") + File.separator +"input.json", RDFFormat.RDFJSON);
+        
         manager.importFile(file, format, graph);
 
         manager.closeConnectionToBlazeGraph();
@@ -114,7 +119,9 @@ public class WebService {
     @Produces({"text/n3", "application/n-quads", "text/nquads", 
                "application/n-triples", "text/plain",
                "application/trig", "application/x-trig", "application/trix",
-               "text/turtle", "application/x-turtle" })
+               "text/turtle", "application/x-turtle", "application/rdf+json",
+               "text/xml", "application/xml", "application/rdf+xml", "application/ld+json",
+               "text/rdf+n3"})
     //TODO changes to HeaderParam
     public Response export(@QueryParam("filename") String filename, 
                                        @DefaultValue("text/plain") @QueryParam("format") String format,
@@ -144,8 +151,6 @@ public class WebService {
         
         
         return response.build();
-
-        //return Response.status(200).entity("Exported successfully!").build();
     }
    	
 }
