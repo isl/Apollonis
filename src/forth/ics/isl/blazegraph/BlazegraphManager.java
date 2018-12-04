@@ -5,6 +5,7 @@
  */
 package forth.ics.isl.blazegraph;
 
+import forth.ics.isl.utils.ResponseStatus;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -160,10 +161,11 @@ public class BlazegraphManager {
     }
     
     
-    public String query(String queryString, String dataFormat, int timeout) {
+    public ResponseStatus query(String queryString, String dataFormat, int timeout) {
         
         TupleQuery tupleQuery;
         String response;
+        ResponseStatus responseStatus;
         
         try (RepositoryConnection conn = repo.getConnection()) {
    
@@ -171,16 +173,28 @@ public class BlazegraphManager {
             tupleQuery.setMaxExecutionTime(timeout);
             //System.out.println("forth.ics.isl.blazegraph.BlazegraphManager.query():"+ tupleQuery);
             ByteArrayOutputStream out = outputStreamData(tupleQuery, dataFormat);
+            if(out == null) {
+                responseStatus = new ResponseStatus(415, "Unsupported Media Type");
+                return responseStatus;
+            }
+            
             byte[] resp = out.toByteArray();
             response = new String(resp);
-        } 
-
-        return response;
+        }
+        
+        if(response.equals(""))
+            responseStatus = new ResponseStatus(204, "No Content returned");
+        else
+            responseStatus = new ResponseStatus(200, response);
+        
+        return responseStatus;
     }
     
     
-    public void importFile(InputStream file, RDFFormat format, String graph) {
+    public ResponseStatus importFile(InputStream file, RDFFormat format, String graph) {
       
+        ResponseStatus responseStatus = null;
+        
         try (RepositoryConnection con = repo.getConnection()) {
 
         con.begin();
@@ -191,16 +205,17 @@ public class BlazegraphManager {
             con.add(file, graph, format, graphIRI);
             //con.add(new BufferedReader(new InputStreamReader(file, StandardCharsets.UTF_8)), graph, format, graphIRI);
             con.commit();
-        }
-        catch (RepositoryException e) {
-      
+            responseStatus = new ResponseStatus(200, "File imported successfully");
+        } catch (RepositoryException e) {
+            responseStatus = new ResponseStatus(404, "Unable to connect to repository");
             con.rollback();
-            }catch (IOException ex) {
-               // Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (RDFParseException ex) {
-               // Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException ex) {
+            responseStatus = new ResponseStatus(400, "Bad request");
+        } catch (RDFParseException ex) {
+            responseStatus = new ResponseStatus(500, "Bad format in file");
         }
+        }     
+        return responseStatus;
     }
 
     
@@ -211,7 +226,9 @@ public class BlazegraphManager {
     }
     
     
-    public String exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
+    public ResponseStatus exportFile(String filename, String namespace, String graph, RDFFormat dataFormat) {
+        
+        ResponseStatus responseStatus;
         
         String fullFilename = filename +"."+ dataFormat.getDefaultFileExtension();
          
@@ -230,11 +247,10 @@ public class BlazegraphManager {
             }
             else
                 con.export(writer);
-           
-
+   
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(BlazegraphManager.class.getName()).log(Level.SEVERE, null, ex);
+            responseStatus = new ResponseStatus(400, "File not found");
         }
-        return fullFilename;
+        return new ResponseStatus(200, fullFilename);
     }
 }

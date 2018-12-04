@@ -7,6 +7,7 @@ import javax.ws.rs.QueryParam;
 
 import forth.ics.isl.blazegraph.*;
 import forth.ics.isl.utils.PropertiesManager;
+import forth.ics.isl.utils.ResponseStatus;
 import java.io.File;
 import java.io.InputStream;
 
@@ -49,11 +50,12 @@ public class WebService {
       
         manager.openConnectionToBlazegraph(serviceURL + "/namespace/" + namespace + "/sparql");
         
-        String output = manager.query(queryString, contentType, timeout);
+        ResponseStatus responseStatus = manager.query(queryString, contentType, timeout);
         
         manager.closeConnectionToBlazeGraph();
         
-        return Response.status(200).entity(output).build();
+        
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
     }
     
     
@@ -77,11 +79,11 @@ public class WebService {
         
         RDFFormat format = Rio.getParserFormatForMIMEType(contentType).get();
         
-        manager.importFile(file, format, graph);
+        ResponseStatus responseStatus = manager.importFile(file, format, graph);
 
         manager.closeConnectionToBlazeGraph();
 
-        return Response.status(200).entity("Imported successfully!").build();
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
     }
     
     
@@ -122,6 +124,8 @@ public class WebService {
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) 
     {
+        
+        
         BlazegraphManager manager = new BlazegraphManager();
 
         String serviceURL = propertiesManager.getTripleStoreUrl();
@@ -133,18 +137,18 @@ public class WebService {
         
         RDFFormat rdfFormat = Rio.getParserFormatForMIMEType(format).get();
          
-        String f = manager.exportFile(filename, namespace, graph, rdfFormat);
+        ResponseStatus responseStatus = manager.exportFile(filename, namespace, graph, rdfFormat);
     
         manager.closeConnectionToBlazeGraph();
         
-        //TODO changes not hardcoded & remove from tomcat
-        String filepath = "/opt/tomcat/apache-tomcat-8.0.53/bin/" + f;
-        File file = new File(filepath);
-        ResponseBuilder response = Response.ok((Object) file);
-        response.header("Content-Disposition","attachment; filename=" + f);
+        if(responseStatus.getStatus() == 200) {
+            String filepath = "/opt/tomcat/apache-tomcat-8.0.53/bin/" + responseStatus.getResponse();
+            File file = new File(filepath);
+            ResponseBuilder response = Response.ok((Object) file);
+            response.header("Content-Disposition","attachment; filename=" + responseStatus.getResponse());
+            return response.build();
+        }
         
-        
-        return response.build();
-    }
-   	
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
+    }  	
 }
