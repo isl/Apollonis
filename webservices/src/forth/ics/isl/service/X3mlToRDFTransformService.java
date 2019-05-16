@@ -27,6 +27,10 @@ import eu.delving.x3ml.X3MLEngineFactory;
 import forth.ics.isl.blazegraph.BlazegraphManager;
 import forth.ics.isl.utils.ResponseStatus;
 
+/**
+*
+* @author Vangelis Kritsotakis
+*/
 @Path("/transform")
 public class X3mlToRDFTransformService {
 
