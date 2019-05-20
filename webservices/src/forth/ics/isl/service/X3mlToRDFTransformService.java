@@ -30,6 +30,20 @@ import forth.ics.isl.utils.ResponseStatus;
 /**
 *
 * @author Vangelis Kritsotakis
+* 
+* Web-service used for transforming X3ML files (along with the respective input files and the Generator Policy file) to RDF.
+* 
+* The service accepts a list of input files, a list of X3ML files and one generator file. The user has three alternative ways 
+* of setting the required input:
+* 	i.   Use file paths on the server;
+* 	ii.  Use URLs of files; or 
+* 	iii. use binary files (input Stream);
+* 
+* All the above ways can be mixed up as long as a) there is at least one input, one X3ML and one Generator Policy file and 
+* b) there is only one Generator Policy set in either way.
+* 
+* There service mixes up all declaed input and X3ML files but follows the priority order: Input Stream, File Path and finally 
+* URL for the Generator policy. 
 */
 @Path("/transform")
 public class X3mlToRDFTransformService {
@@ -138,7 +152,6 @@ public class X3mlToRDFTransformService {
 				// (priority Order: i. InputStream, ii. FilePath iii.FileURL)
 				
 				// InputStream
-				//if(generatorPolicyFormDataBodyPart != null) {
 				if(generatorPolicyFileStream != null) {
 					//InputStream generatorPolicyFileStream = generatorPolicyFormDataBodyPart.getEntityAs(InputStream.class);
 					System.out.println(generatorPolicyFileStream);
@@ -153,7 +166,7 @@ public class X3mlToRDFTransformService {
 				else if(generatorPolicyFileUrl != null) { // generatorPolicyFileUrl is a String
 					System.out.println(generatorPolicyFileUrl);
 					try {
-						// generatorPolicyFileUrl is a String
+						// Mind that generatorPolicyFileUrl variable is a String
 						URL fileUrl = new URL(generatorPolicyFileUrl);
 						x3MLEngineFactory.withGeneratorPolicy(fileUrl);
 					} catch (MalformedURLException e) {
@@ -180,16 +193,15 @@ public class X3mlToRDFTransformService {
 				x3MLEngineFactory.execute();
 				String output = byteArrayOutputStream.toString();
 				message.put("output", output.replace("\n", "").replace("\r", ""));
-				//message.put("output", output);
 				
 				String errors = "";
 				if(!eu.delving.x3ml.X3MLEngine.exceptionMessagesList.equals("")) {
 					errors = eu.delving.x3ml.X3MLEngine.exceptionMessagesList;
 					message.put("errorMessage", errors);
 				}
-				System.out.println();
-				System.out.println("output:");
-				System.out.println(output);
+				//System.out.println();
+				//System.out.println("output:");
+				//System.out.println(output);
 			}
 
 		} catch (Exception ex) {
