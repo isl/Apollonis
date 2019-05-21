@@ -9,12 +9,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -42,25 +45,26 @@ import forth.ics.isl.utils.ResponseStatus;
 * All the above ways can be mixed up as long as a) there is at least one input, one X3ML and one Generator Policy file and 
 * b) there is only one Generator Policy set in either way.
 * 
-* There service mixes up all declaed input and X3ML files but follows the priority order: Input Stream, File Path and finally 
+* There service mixes up all declared input and X3ML files but follows the priority order: Input Stream, File Path and finally 
 * URL for the Generator policy. 
 */
 @Path("/transform")
 public class X3mlToRDFTransformService {
-
+	
 	@POST
     @Path("/x3mltoRdf")
-    public Response x3mltoRdftransform(@DefaultValue("application/json") @HeaderParam("Content-Type") String contentType,
-    								   @FormDataParam("inputFileStream") List<FormDataBodyPart> inputFormDataBodyPartList,
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+    public Response x3mltoRdftransform(@FormDataParam("inputFileStream") List<FormDataBodyPart> inputFormDataBodyPartList,
     								   @FormDataParam("x3mlFileStream") List<FormDataBodyPart> x3mlFormDataBodyPartList,
-    								   @FormDataParam("generatorPolicyFileStream") InputStream  generatorPolicyFileStream,
-                                       @QueryParam("inputFilePath") List<String> inputFilePathList,
-    								   @QueryParam("x3mlFilePath") List<String> x3mlFilePathList,
-    								   @QueryParam("generatorPolicyFilePath") String generatorPolicyFilePath,
-    								   @QueryParam("inputFileUrl") List<String> inputFileUrlList,
-    								   @QueryParam("x3mlFileUrl") List<String> x3mlFileUrlList,
-    								   @QueryParam("generatorPolicyFileUrl") String generatorPolicyFileUrl,
-    								   @DefaultValue("rdf-xml") @QueryParam("outputContentType") String outputContentType) {
+    								   @FormDataParam("generatorPolicyFileStream") FormDataBodyPart generatorPolicyFormDataBodyPart,
+    								   @FormDataParam("inputFilePath") List<String> inputFilePathList,
+    								   @FormDataParam("x3mlFilePath") List<String> x3mlFilePathList,
+    								   @FormDataParam("generatorPolicyFilePath") String generatorPolicyFilePath,
+    								   @FormDataParam("inputFileUrl") List<String> inputFileUrlList,
+    								   @FormDataParam("x3mlFileUrl") List<String> x3mlFileUrlList,
+    								   @FormDataParam("generatorPolicyFileUrl") String generatorPolicyFileUrl,
+    								   @FormDataParam("transformContentType") String transformContentType) {
 		
 		JSONObject message = new JSONObject();
 		int status = 0;
@@ -152,8 +156,8 @@ public class X3mlToRDFTransformService {
 				// (priority Order: i. InputStream, ii. FilePath iii.FileURL)
 				
 				// InputStream
-				if(generatorPolicyFileStream != null) {
-					//InputStream generatorPolicyFileStream = generatorPolicyFormDataBodyPart.getEntityAs(InputStream.class);
+				if(generatorPolicyFormDataBodyPart != null) {
+					InputStream generatorPolicyFileStream = generatorPolicyFormDataBodyPart.getEntityAs(InputStream.class);
 					System.out.println(generatorPolicyFileStream);
 					x3MLEngineFactory.withGeneratorPolicy(generatorPolicyFileStream);
 				}
@@ -184,9 +188,9 @@ public class X3mlToRDFTransformService {
 			
 			if(proceed) {
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				if(outputContentType.equals("rdf-xml"))
+				if(transformContentType.equals("rdf-xml"))
 					x3MLEngineFactory.withOutput(byteArrayOutputStream, X3MLEngineFactory.OutputFormat.RDF_XML);
-				else if(outputContentType.equals("turtle"))
+				else if(transformContentType.equals("turtle"))
 					x3MLEngineFactory.withOutput(byteArrayOutputStream, X3MLEngineFactory.OutputFormat.TURTLE);
 				else
 					x3MLEngineFactory.withOutput(byteArrayOutputStream, X3MLEngineFactory.OutputFormat.RDF_XML);
