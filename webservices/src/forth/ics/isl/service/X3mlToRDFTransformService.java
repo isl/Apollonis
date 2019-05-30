@@ -1,5 +1,6 @@
 package forth.ics.isl.service;
 
+import gr.forth.ics.isl.x3ml.X3MLEngineFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 
-import eu.delving.x3ml.X3MLEngineFactory;
+//import eu.delving.x3ml.X3MLEngineFactory;
 
 /**
 *
@@ -190,8 +191,8 @@ public class X3mlToRDFTransformService {
 				message.put("output", output.replace("\n", "").replace("\r", ""));
 				
 				String errors = "";
-				if(!eu.delving.x3ml.X3MLEngine.exceptionMessagesList.equals("")) {
-					errors = eu.delving.x3ml.X3MLEngine.exceptionMessagesList;
+				if(!gr.forth.ics.isl.x3ml.X3MLEngine.exceptionMessagesList.equals("")) {
+					errors = gr.forth.ics.isl.x3ml.X3MLEngine.exceptionMessagesList;
 					message.put("errorMessage", errors);
 				}
 				//System.out.println();
