@@ -20,8 +20,6 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 
-//import eu.delving.x3ml.X3MLEngineFactory;
-
 /**
 *
 * @author Vangelis Kritsotakis

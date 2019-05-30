@@ -33,6 +33,7 @@
 			<id>FORTH-ISL-snapshots</id>
 			<name>FORTH ISL Nexus repository - Snapshots</name>
 			<url>http://www.ics.forth.gr/isl/maven-snapshots/</url>
+			<!-- Always Update -->
 			<snapshots><updatePolicy>always</updatePolicy></snapshots>
 		</repository>
 	</repositories>
