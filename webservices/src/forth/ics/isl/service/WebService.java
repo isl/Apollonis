@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 
 /**
@@ -34,16 +35,16 @@ public class WebService {
     
     @GET
     @Path("/query")
-    //@Produces({"text/csv", "application/json", "application/sparql-results+json", "application/sparql-results+xml", "application/xml", "text/tab-separated-values"})
     public Response query(@QueryParam("queryString") String queryString,
-                          //@DefaultValue("application/json") @QueryParam("contentType") String contentType,
+                          @QueryParam("service-url") String serviceURL,
                           @HeaderParam("Content-Type") String contentType,
                           @QueryParam("namespace") String namespace,
                           @DefaultValue("0") @QueryParam("timeout") int timeout) {
         
         BlazegraphManager manager = new BlazegraphManager();
         
-        String serviceURL = propertiesManager.getTripleStoreUrl();
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
         
         if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
@@ -61,16 +62,16 @@ public class WebService {
     
     @POST
     @Path("/import")
-    //@Consumes({"text/plain", "application/rdf+xml", "application/x-turtle", "text/rdf+n3"})
-    public Response importToBlazegraph(InputStream file, 
-                                       //@DefaultValue("text/plain") @QueryParam("contentType") String contentType,
+    public Response importToBlazegraph(InputStream file,
+                                       @QueryParam("service-url") String serviceURL,
                                        @HeaderParam("Content-Type") String contentType,
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) {
 
         BlazegraphManager manager = new BlazegraphManager();
 
-        String serviceURL = propertiesManager.getTripleStoreUrl();
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
         
         if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
@@ -83,19 +84,21 @@ public class WebService {
 
         manager.closeConnectionToBlazeGraph();
 
-        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "*").build();
+       // return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
     }
     
     
     @POST
     @Path("/update")
-    //TODO more testing
     public Response update(@QueryParam("update") String updateMsg,
-                           @QueryParam("namespace") String namespace) {
+                           @QueryParam("namespace") String namespace,
+                           @QueryParam("service-url") String serviceURL) {
         
         BlazegraphManager manager = new BlazegraphManager();
 
-        String serviceURL = propertiesManager.getTripleStoreUrl();
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
         
         if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
@@ -106,20 +109,15 @@ public class WebService {
 
         manager.closeConnectionToBlazeGraph();
         
-        return Response.status(200).entity("Updated!!").build();
+        return Response.status(200).entity("Successfully updated").header("Access-Control-Allow-Origin", "*").build();
+        //return Response.status(200).entity("Updated!!").build();
     }
     
     
     @GET
     @Path("/export")
-    //@Produces({"text/n3", "application/n-quads", "text/nquads", 
-    //           "application/n-triples", "text/plain",
-    //           "application/trig", "application/x-trig", "application/trix",
-    //           "text/turtle", "application/x-turtle", "application/rdf+json",
-    //           "text/xml", "application/xml", "application/rdf+xml", "application/ld+json",
-    //           "text/rdf+n3"})
     public Response export(@QueryParam("filename") String filename, 
-                                       //@DefaultValue("text/plain") @QueryParam("format") String format,
+                                       @QueryParam("service-url") String serviceURL,
                                        @HeaderParam("Accept") String format,
                                        @QueryParam("namespace") String namespace,
                                        @DefaultValue("") @QueryParam("graph") String graph) 
@@ -128,7 +126,8 @@ public class WebService {
         
         BlazegraphManager manager = new BlazegraphManager();
 
-        String serviceURL = propertiesManager.getTripleStoreUrl();
+        if(serviceURL == null)
+            serviceURL = propertiesManager.getTripleStoreUrl();
         
         if(namespace == null)
             namespace = propertiesManager.getTripleStoreNamespace();
@@ -149,6 +148,13 @@ public class WebService {
             return response.build();
         }
         
-        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
+        return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).header("Access-Control-Allow-Origin", "*").build();
+        //return Response.status(responseStatus.getStatus()).entity(responseStatus.getResponse()).build();
     }  	
 }
+
+
+
+
+
+

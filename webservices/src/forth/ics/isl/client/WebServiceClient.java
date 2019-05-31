@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpEntity;
@@ -18,6 +20,9 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
 /**
 *
@@ -31,58 +36,73 @@ public class WebServiceClient {
 	private static final String REST_URI = "http://localhost:8080/WebServices";
 	
 	public static void main(String... args) {
+            
+            
+                // ##################### Executing SPARQL Import service ####################
+		
+		String stringImportResponse = postSparqlImportToBlazegraph(REST_URI + "/webServices/import", "/home/mhalkiad/Documents/data.rdf", 
+				"kb", "http://graph.kb.rdf", "application/rdf+xml");
+		System.out.println("Import Service Response:");
+		System.out.println(stringImportResponse);
+                
+                // ##################### Executing SPARQL Export service ####################
+//		
+//		String stringExportResponse = getSparqlExportResults(REST_URI + "/webServices/export", "/home/mhalkiad/Documents/data.rdf", 
+//                                  "application/rdf+xml", "kb", "http://graph.kb.rdf");
+//		System.out.println("Export Service Response:");
+//		System.out.println(stringExportResponse);
 		
 		// ##################### Executing SPARQL Query service ####################
-		
-		String stringQueryResponse = getSparqlQueryResults(REST_URI + "/webServices/query", "select * where {?s ?p ?o} limit 100", 
-				100, "test2", "application/json");
-		System.out.println("Query Service Response:");
-		System.out.println(stringQueryResponse);
-		
-		
-		// ###################### Executing Transform service ######################
-		
-		// Setting Arguments - Source Input
-		// (2 Files on the client)
-		ArrayList<File> inputFileList = new ArrayList<File>();
-		inputFileList.add(new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\input-1.xml"));
-		inputFileList.add(new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\input-2.xml"));
-		// (1 FilePath (String) on the server)
-		ArrayList<String> inputFilePathList = new ArrayList<String>();
-		inputFilePathList.add("C:\\Workspaces\\reactTestWorkSpace\\Input files backup\\Transform Service Example\\X3ML example\\input-3.xml");
-		// (1 URL (String))
-		ArrayList<String> inputFileUrlList = new ArrayList<String>();
-		inputFileUrlList.add("file:///C:/Workspaces/reactTestWorkSpace/Input%20files%20backup/Transform%20Service%20Example/X3ML%20example/input-4.xml");
-		
-		// Setting Arguments - X3ML input
-		// (1 File on the client)
-		ArrayList<File> x3mlFileList = new ArrayList<File>();
-		x3mlFileList.add(new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\mappings-1.x3ml"));
-		// (1 FilePath (String) on the server)
-		ArrayList<String> x3mlFilePathList = new ArrayList<String>();
-		x3mlFilePathList.add("C:\\Workspaces\\reactTestWorkSpace\\Input files backup\\Transform Service Example\\X3ML example\\mappings-2.x3ml");
-		// (0 URL (String))
-		ArrayList<String> x3mlFileUrlList = new ArrayList<String>();
-		//x3mlFileUrlList.add("file:///C:/Workspaces/reactTestWorkSpace/Input%20files%20backup/Transform%20Service%20Example/X3ML%20example/mappings-2.x3ml");
-		
-		// Setting Arguments - Generator policy Input
-		// (1 File on the client)
-		File generatorPolicyFile = new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\generator-policy.xml");
-		//String generatorPolicyFilePath = "C:\\Workspaces\\reactTestWorkSpace\\Input files backup\\Transform Service Example\\X3ML example\\generator-policy.xml";
-		// (0 FilePath (String) on the server)
-		String generatorPolicyFilePath = null;
-		// (0 URL (String))
-		String generatorPolicyFileUrl = null;
-		
-		// Calling the transformation Service
-		String stringTransformationResponse = postX3mlToRDFTransformResults(REST_URI + "/transform/x3mltoRdf", 
-				inputFileList, inputFilePathList, inputFileUrlList, 
-				x3mlFileList, x3mlFilePathList, x3mlFileUrlList,
-				generatorPolicyFile, generatorPolicyFilePath, generatorPolicyFileUrl,
-				"rdf-xml");
-		
-		System.out.println("Transformation Service Response:");
-		System.out.println(stringTransformationResponse);
+//		
+//		String stringQueryResponse = getSparqlQueryResults(REST_URI + "/webServices/query", "select * where {?s ?p ?o} limit 100", 
+//				100, "test2", "application/json");
+//		System.out.println("Query Service Response:");
+//		System.out.println(stringQueryResponse);
+//		
+//		
+//		// ###################### Executing Transform service ######################
+//		
+//		// Setting Arguments - Source Input
+//		// (2 Files on the client)
+//		ArrayList<File> inputFileList = new ArrayList<File>();
+//		inputFileList.add(new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\input-1.xml"));
+//		inputFileList.add(new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\input-2.xml"));
+//		// (1 FilePath (String) on the server)
+//		ArrayList<String> inputFilePathList = new ArrayList<String>();
+//		inputFilePathList.add("C:\\Workspaces\\reactTestWorkSpace\\Input files backup\\Transform Service Example\\X3ML example\\input-3.xml");
+//		// (1 URL (String))
+//		ArrayList<String> inputFileUrlList = new ArrayList<String>();
+//		inputFileUrlList.add("file:///C:/Workspaces/reactTestWorkSpace/Input%20files%20backup/Transform%20Service%20Example/X3ML%20example/input-4.xml");
+//		
+//		// Setting Arguments - X3ML input
+//		// (1 File on the client)
+//		ArrayList<File> x3mlFileList = new ArrayList<File>();
+//		x3mlFileList.add(new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\mappings-1.x3ml"));
+//		// (1 FilePath (String) on the server)
+//		ArrayList<String> x3mlFilePathList = new ArrayList<String>();
+//		x3mlFilePathList.add("C:\\Workspaces\\reactTestWorkSpace\\Input files backup\\Transform Service Example\\X3ML example\\mappings-2.x3ml");
+//		// (0 URL (String))
+//		ArrayList<String> x3mlFileUrlList = new ArrayList<String>();
+//		//x3mlFileUrlList.add("file:///C:/Workspaces/reactTestWorkSpace/Input%20files%20backup/Transform%20Service%20Example/X3ML%20example/mappings-2.x3ml");
+//		
+//		// Setting Arguments - Generator policy Input
+//		// (1 File on the client)
+//		File generatorPolicyFile = new File("C:\\\\Workspaces\\\\reactTestWorkSpace\\\\Input files backup\\\\Transform Service Example\\\\X3ML example\\\\generator-policy.xml");
+//		//String generatorPolicyFilePath = "C:\\Workspaces\\reactTestWorkSpace\\Input files backup\\Transform Service Example\\X3ML example\\generator-policy.xml";
+//		// (0 FilePath (String) on the server)
+//		String generatorPolicyFilePath = null;
+//		// (0 URL (String))
+//		String generatorPolicyFileUrl = null;
+//		
+//		// Calling the transformation Service
+//		String stringTransformationResponse = postX3mlToRDFTransformResults(REST_URI + "/transform/x3mltoRdf", 
+//				inputFileList, inputFilePathList, inputFileUrlList, 
+//				x3mlFileList, x3mlFilePathList, x3mlFileUrlList,
+//				generatorPolicyFile, generatorPolicyFilePath, generatorPolicyFileUrl,
+//				"rdf-xml");
+//		
+//		System.out.println("Transformation Service Response:");
+//		System.out.println(stringTransformationResponse);
 	}
 	
 	/**
@@ -205,6 +225,86 @@ public class WebServiceClient {
 		finally {
 		     HttpClientUtils.closeQuietly(response);
 		 }
+        return strRes;
+    }
+    
+    
+    /** Imports data to Blazegraph triple store
+	 * 
+	 * 
+	 * @param  relativeUrl          A String representation of the absolute URL of the service.
+	 * @param  serviceUrl           A String representation of the URL of the triple store.
+         * @param  ContentType          The content type of the input data.
+	 * @param  namespace 		The name of the namespace into triple store where the data will be inserted.
+	 * @param  graph                The name of the graph into triple store where the data will be inserted.
+	 * @return                      The image at the specified URL
+	 */
+    public static String postSparqlImportToBlazegraph(String url, String filename, String namespace, String graph, String format) {
+    	
+        Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
+        FileDataBodyPart filePart = new FileDataBodyPart();
+        filePart.setFileEntity(new File(filename));
+        
+        FormDataMultiPart formDataMultiPart = (FormDataMultiPart)new FormDataMultiPart().field("test", "test1").bodyPart(filePart);
+        
+        WebTarget target = client.target(url);
+              
+    	Response response;
+    	String strRes;
+        
+//        FileDataBodyPart filePart = new FileDataBodyPart(new File(filename));
+//        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar").bodyPart(filePart);
+        
+//		try {
+			response = client.target(url)
+ 			  .queryParam("graph", graph)
+ 			  .queryParam("filename", filename)
+ 			  .queryParam("namespace", namespace)
+ 			  .request()
+ 			  .header("Accept", format)
+                          .post(Entity.entity(multipart, multipart.getMediaType()));
+			strRes = response.readEntity(String.class);
+//		} 
+//		catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//			strRes = "There were error while executing the SPARQL query";
+//		}
+        client.close();
+        return strRes;
+    }
+    
+    
+    /**
+	 * Exports data of a particular namespace and graph from triple store into a specific format 
+	 * 
+	 * @param  serviceUrl  		A String representation of the absolute URL of the service.
+	 * @param  filename             A String representation of the path of the file that will be stored
+         * @param  namespace 		The name of the namespace where the export will be executed
+	 * @param  graph		The name of the graph where the export will be executed
+	 * @param  format               The content type of the output
+	 * @return                      the image at the specified URL
+	 */
+    public static String getSparqlExportResults(String serviceUrl, String filename, String format, String namespace, String graph) {
+    	
+        Client client = ClientBuilder.newClient();
+    	Response response;
+    	String strRes;
+//               try {
+			response = client.target(serviceUrl)
+ 			  .queryParam("filename", filename)
+ 			  .queryParam("graph", graph)
+ 			  .queryParam("namespace", namespace)
+ 			  .request()
+ 			  .header("Accept", format)
+ 			  .get();
+			strRes = response.readEntity(String.class);
+//		} 
+//		catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//			strRes = "There were error while executing the SPARQL query";
+//		}
+        client.close();
         return strRes;
     }
     
