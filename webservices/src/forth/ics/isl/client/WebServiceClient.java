@@ -52,7 +52,7 @@ public class WebServiceClient {
                 // ##################### Executing SPARQL Import service ####################
 		
 		String stringImportResponse = postSparqImport(REST_URI + "/webServices/import", "/home/mhalkiad/Documents/data.rdf", 
-				"kb", "http://graph.kb.rdf", "application/rdf+xml");
+				"kb", "http://graph.kb.rdf", "application/rdf+xml","http://139.91.183.72:8091/blazegraph");
 		System.out.println("Import Service Response:");
 		System.out.println(stringImportResponse);
                 
@@ -245,7 +245,9 @@ public class WebServiceClient {
 	 * lostSparqlImportToBlazegraph(String url, String filename, String namespace, String graph, String format) {
     	
         */
-        public static String postSparqImport(String serviceUrl, String filename, String format, String namespace, String graph) throws IOException {
+        public static String postSparqImport(String serviceUrl, String filename, 
+                                             String namespace, String graph, String format,
+                                             String dataUrl) throws IOException {
            
 
 	HttpClient client = HttpClientBuilder.create().build();
@@ -256,10 +258,10 @@ public class WebServiceClient {
         
         // add params
         ArrayList<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-	urlParameters.add(new BasicNameValuePair("sn", "C02G8416DRJM"));
-	urlParameters.add(new BasicNameValuePair("cn", ""));
-	urlParameters.add(new BasicNameValuePair("locale", ""));
-	urlParameters.add(new BasicNameValuePair("caller", ""));
+	urlParameters.add(new BasicNameValuePair("namespace", namespace));
+	urlParameters.add(new BasicNameValuePair("graph", graph));
+	urlParameters.add(new BasicNameValuePair("service-url", dataUrl));
+//	urlParameters.add(new BasicNameValuePair("caller", ""));
         
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
 

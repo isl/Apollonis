@@ -6,6 +6,7 @@
 package forth.ics.isl.blazegraph;
 
 import forth.ics.isl.utils.ResponseStatus;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -191,7 +192,7 @@ public class BlazegraphManager {
     }
     
     
-    public ResponseStatus importFile(InputStream file, RDFFormat format, String graph) {
+    public ResponseStatus importFile(String file, RDFFormat format, String graph){
       
         ResponseStatus responseStatus = null;
         
@@ -202,7 +203,7 @@ public class BlazegraphManager {
             ValueFactory factory = SimpleValueFactory.getInstance();
             IRI graphIRI = factory.createIRI(graph);
             
-            con.add(file, graph, format, graphIRI);
+            con.add(new File(file), graph, format, graphIRI);
             //con.add(new BufferedReader(new InputStreamReader(file, StandardCharsets.UTF_8)), graph, format, graphIRI);
             con.commit();
             responseStatus = new ResponseStatus(200, "File imported successfully");
@@ -210,7 +211,7 @@ public class BlazegraphManager {
             responseStatus = new ResponseStatus(404, "Unable to connect to repository");
             con.rollback();
         } catch (IOException ex) {
-            responseStatus = new ResponseStatus(400, "Bad request");
+             responseStatus = new ResponseStatus(400, "Bad request");
         } catch (RDFParseException ex) {
             responseStatus = new ResponseStatus(500, "Bad format in file");
         }

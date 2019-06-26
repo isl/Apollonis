@@ -62,7 +62,7 @@ public class WebService {
     
     @POST
     @Path("/import")
-    public Response importToBlazegraph(InputStream file,
+    public Response importToBlazegraph(@QueryParam ("file") String file,
                                        @QueryParam("service-url") String serviceURL,
                                        @HeaderParam("Content-Type") String contentType,
                                        @QueryParam("namespace") String namespace,
