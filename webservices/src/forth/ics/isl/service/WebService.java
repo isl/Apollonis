@@ -123,7 +123,8 @@ public class WebService {
                                        @DefaultValue("") @QueryParam("graph") String graph) 
     {
         
-        
+        System.out.println("filename: " + filename + " namespace:" + namespace + " graph:" 
+                            + graph + " service-url:" + serviceURL + " accept:" + format);
         BlazegraphManager manager = new BlazegraphManager();
 
         if(serviceURL == null)

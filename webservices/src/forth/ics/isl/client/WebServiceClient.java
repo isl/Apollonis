@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -25,8 +26,10 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -50,7 +53,7 @@ public class WebServiceClient {
             
             
                 // ##################### Executing SPARQL Import service ####################
-		
+//		
 		String stringImportResponse = postSparqImport(REST_URI + "/webServices/import", "/home/mhalkiad/Documents/data.rdf", 
 				"kb", "http://graph.kb.rdf", "application/rdf+xml","http://139.91.183.72:8091/blazegraph");
 		System.out.println("Import Service Response:");
@@ -58,18 +61,23 @@ public class WebServiceClient {
                 
                 // ##################### Executing SPARQL Export service ####################
 //		
-//		String stringExportResponse = getSparqlExportResults(REST_URI + "/webServices/export", "/home/mhalkiad/Documents/test361", 
-//                                  "application/rdf+xml", "kb", "http://graph.kb.rdf");
+//		String stringExportResponse = getSparqlExportResults(REST_URI + "/webServices/export", "/home/mhalkiad/Documents/test361.rdf", 
+//                                  "application/rdf+xml", "kb", "http://graph.kb.rdf", "http://139.91.183.72:8091/blazegraph");
 //		System.out.println("Export Service Response:");
 //		System.out.println(stringExportResponse);
 //		
 		// ##################### Executing SPARQL Query service ####################
 //		
 //		String stringQueryResponse = getSparqlQueryResults(REST_URI + "/webServices/query", "select * where {?s ?p ?o} limit 100", 
-//				100, "test2", "application/json");
+//				100, "kb", "application/json");
 //		System.out.println("Query Service Response:");
 //		System.out.println(stringQueryResponse);
+
+//		// ##################### Executing SPARQL update service ####################
 //		
+//		String stringQueryResponse = postSparqUpdate(REST_URI + "/webServices/update", "select * where {?s ?p ?o} limit 100", "kb", "http://139.91.183.72:8091/blazegraph");
+//		System.out.println("Update Service Response:");
+//		System.out.println(stringQueryResponse);
 //		
 //		// ###################### Executing Transform service ######################
 //		
@@ -138,11 +146,14 @@ public class WebServiceClient {
  			  .header("Content-Type", outputContentType)
  			  .get();
 			strRes = response.readEntity(String.class);
+                         System.out.println("GET: " + response.toString());
 		} 
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			strRes = "There were error while executing the SPARQL query";
 		}
+                
+       
         client.close();
         return strRes;
     }
@@ -244,45 +255,62 @@ public class WebServiceClient {
 	 * 
 	 * lostSparqlImportToBlazegraph(String url, String filename, String namespace, String graph, String format) {
     	
-        */
+    */
         public static String postSparqImport(String serviceUrl, String filename, 
                                              String namespace, String graph, String format,
                                              String dataUrl) throws IOException {
            
+            CloseableHttpClient client = HttpClients.createDefault();
+            HttpPost post = new HttpPost(serviceUrl);
+            
+            post.setHeader("Content-Type", format);
+            
+            List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+	    urlParameters.add(new BasicNameValuePair("file", filename));
+	    urlParameters.add(new BasicNameValuePair("namespace", namespace));
+	    urlParameters.add(new BasicNameValuePair("graph", graph));
+            urlParameters.add(new BasicNameValuePair("service-url", dataUrl));
 
-	HttpClient client = HttpClientBuilder.create().build();
-	HttpPost post = new HttpPost(serviceUrl);
+	    post.setEntity(new UrlEncodedFormEntity(urlParameters));
 
-	// add header
-	post.setHeader("Content-Type", format);
-        
-        // add params
-        ArrayList<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-	urlParameters.add(new BasicNameValuePair("namespace", namespace));
-	urlParameters.add(new BasicNameValuePair("graph", graph));
-	urlParameters.add(new BasicNameValuePair("service-url", dataUrl));
-//	urlParameters.add(new BasicNameValuePair("caller", ""));
-        
-        post.setEntity(new UrlEncodedFormEntity(urlParameters));
+	    HttpResponse response = client.execute(post);
+	    System.out.println("\nSending 'POST' request to URL : " + serviceUrl);
+	    System.out.println("Post parameters : " + post.getEntity());
+	    System.out.println("Response Code : " + 
+                                    response.getStatusLine().getStatusCode());
 
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.addBinaryBody("file", new File(filename));
-	HttpEntity multipart = builder.build();
-        post.setEntity(multipart);
-
-        
-	HttpResponse response = client.execute(post);
-	System.out.println("Response Code : " 
-                + response.getStatusLine().getStatusCode());
-
-//	BufferedReader rd = new BufferedReader(
-//	        new InputStreamReader(response.getEntity().getContent()));
-
-	
-        return response.getStatusLine().getReasonPhrase();
+            return "OK";
         }
         
     
+        /** Update the existing data into Blazegraph triple store
+	 * 
+	 *
+    	*/
+        
+        public static String postSparqUpdate(String serviceUrl, String updateString, 
+                                             String namespace, String dataUrl) throws IOException {
+           
+            CloseableHttpClient client = HttpClients.createDefault();
+            HttpPost post = new HttpPost(serviceUrl);
+           
+            List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+	    urlParameters.add(new BasicNameValuePair("update", updateString));
+	    urlParameters.add(new BasicNameValuePair("namespace", namespace));
+            urlParameters.add(new BasicNameValuePair("service-url", dataUrl));
+
+	    post.setEntity(new UrlEncodedFormEntity(urlParameters));
+
+	    HttpResponse response = client.execute(post);
+	    System.out.println("\nSending 'POST' request to URL : " + serviceUrl);
+	    System.out.println("Post parameters : " + post.getEntity());
+	    System.out.println("Response Code : " + 
+                                    response.getStatusLine().getStatusCode());
+
+            return "OK";
+        }
+        
+        
     
     /**
 	 * Exports data of a particular namespace and graph from triple store into a specific format 
@@ -294,25 +322,23 @@ public class WebServiceClient {
 	 * @param  format               The content type of the output
 	 * @return                     the image at the specified URL
 	 */
-    public static String getSparqlExportResults(String serviceUrl, String filename, String format, String namespace, String graph) {
+    public static String getSparqlExportResults(String url, String filename, String format, String namespace, String graph, String triplestoreUrl) {
     	
         Client client = ClientBuilder.newClient();
     	Response response;
     	String strRes;
-//               try {
-			response = client.target(serviceUrl)
- 			  .queryParam("filename", filename)
- 			  .queryParam("graph", graph)
- 			  .queryParam("namespace", namespace)
- 			  .request()
- 			  .header("Accept", format)
- 			  .get();
-			strRes = response.readEntity(String.class);
-//		} 
-//		catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//			strRes = "There were error while executing the SPARQL query";
-//		}
+
+	response = client.target(url)
+                    .queryParam("service-url", triplestoreUrl)
+ 		    .queryParam("filename", filename)
+ 		    .queryParam("graph", graph)
+ 	            .queryParam("namespace", namespace)
+ 		    .request()
+ 		    .header("Accept", format)
+ 		    .get();
+	
+        strRes = response.readEntity(String.class);
+        System.out.println("response: " + response.toString());
         client.close();
         return strRes;
     }
