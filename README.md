@@ -13,7 +13,7 @@ The operations that are provided to RDF data are:
 Within the triplestore the data is inserted into a specific namespace and graph that are passed as parameters 
 to the web service.
 The allowed formats of data are:
-    • RDFFormat.BINARY	[application/x-binary-rdf]
+    • RDFFormat.BINARY	    [application/x-binary-rdf]
     • RDFFormat.JSONLD		[application/ld+json]
     • RDFFormat.N3		[text/n3, text/rdf+n3]
     • RDFFormat.NQUADS	[application/n-quads, text/x-nquads, text/nquads]
