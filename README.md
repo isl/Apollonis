@@ -24,3 +24,4 @@ The allowed formats of data are:
     • RDFFormat.TRIG		[application/trig, application/x-trig]
     • RDFFormat.TRIX		[application/trix]
     • RDFFormat.TURTLE	[text/turtle, application/x-turtle]
+
