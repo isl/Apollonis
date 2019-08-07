@@ -42,3 +42,12 @@ and the namespace we want to update the content.
 
 If the content is successfully updated in the triplestore, the web service returns a success message or an error message 
 is returned.
+
+
+4) Export content from triplestore (export): This web service extracts content of a predefined namespace and graph from 
+the RDF database. The data that extracted from the triplestore is stored in a file with a specified name and format. The
+file is stored on the disk in the path that Apache Tomcat is installed. The namespace, the graph, the file name and format
+are the parameters of the web service. 
+
+In case of successful extraction of the data from the triplestore, the web service returns the results in the desired 
+format or else an error message is returned.
