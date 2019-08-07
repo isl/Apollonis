@@ -65,11 +65,11 @@ and then follows the necessary parameters for each web service separately.
 Below are examples of the web services:
 
     • To import new RDF data into the database in the "kb" namespace and "http: //graph.kb.rdf" graph execute:
-    http: // localhost: 8080 / WebServices / webServices / import? namespace = kb & graph = http: //graph.kb.rdf&contentType=application/rdf+xml
+    http://localhost:8080/WebServices/webServices/import?namespace=kb&graph=http://graph.kb.rdf&contentType=application/rdf+xml
 
     • To retrieve all data from the database in JSON format execute: 
-    http: // localhost: 8080 / WebServices / webServices / query? QueryString = select * where {? S? P? O} & timeout = 100 & contentType = application / json
+    http://localhost:8080/WebServices/webServices/query?queryString="select * where {? S? P? ?O}"&timeout=100&contentType=application/json
 
-     • To extract RDF data from the database from the "kb" namespace and "http: //nt.kb" graph in 
+     • To extract RDF data from the database from the "kb" namespace and "http://nt.kb" graph in 
      NT format to a file named "filename" execute:
-    http: // localhost: 8080 / WebServices / webServices / export? filename = filename & format = text / plain & namespace = kb & graph = http: //nt.kb
+     http://localhost:8080/WebServices/webServices/export?filename=filename&format=text/plain&namespace=kb&graph=http://nt.kb
