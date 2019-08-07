@@ -25,7 +25,7 @@ The allowed formats of data are:
     • RDFFormat.TRIX		[application/trix]
     • RDFFormat.TURTLE	    [text/turtle, application/x-turtle]
 
-For successful import, the web service returns a success message, otherwise, an error message is returned.
+    For successful import, the web service returns a success message, otherwise, an error message is returned.
 
 2) Query content to triplestore (query): This web service executes a SPARQL query to retrieve information from the RDF
 triplestore database in a particular format. The parameters of the web service are: a string  with the  SPARQL query. 
@@ -33,15 +33,15 @@ Another parameter is the format of the returned results (content-type) is: CSV, 
 Additional parameters are the namespace from which we want the content to be retrieved and the maximum timeout that allowed 
 in order to complete the whole process and return the data. 
 
-For successful querying, the web service returns the data from the triplestore in the desired format or an error message 
-is returned.
+    For successful querying, the web service returns the data from the triplestore in the desired format or an error message 
+    is returned.
 
 
 3) Update the existing content in triplestore (update): The parameters for this web service are a SPARQL query for update 
 and the namespace we want to update the content. 
 
-If the content is successfully updated in the triplestore, the web service returns a success message or an error message 
-is returned.
+    If the content is successfully updated in the triplestore, the web service returns a success message or an error message 
+    is returned.
 
 
 4) Export content from triplestore (export): This web service extracts content of a predefined namespace and graph from 
@@ -49,5 +49,5 @@ the RDF database. The data that extracted from the triplestore is stored in a fi
 file is stored on the disk in the path that Apache Tomcat is installed. The namespace, the graph, the file name and format
 are the parameters of the web service. 
 
-In case of successful extraction of the data from the triplestore, the web service returns the results in the desired 
-format or else an error message is returned.
+    In case of successful extraction of the data from the triplestore, the web service returns the results in the desired 
+    format or else an error message is returned.
