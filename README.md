@@ -35,3 +35,10 @@ in order to complete the whole process and return the data.
 
 For successful querying, the web service returns the data from the triplestore in the desired format or an error message 
 is returned.
+
+
+3) Update the existing content in triplestore (update): The parameters for this web service are a SPARQL query for update 
+and the namespace we want to update the content. 
+
+If the content is successfully updated in the triplestore, the web service returns a success message or an error message 
+is returned.
